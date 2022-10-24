@@ -4,14 +4,14 @@ create table `fund`(
     `id` int unsigned not null auto_increment primary key,
     `code` char(6) not null default 0 comment '代码',
     `name` varchar(255) not null default '' comment '名称',
-    `create_time` datetime default null comment '创建时间'
+    `create_time` datetime default current_timestamp() comment '创建时间'
 )engine=innodb charset=utf8 comment '基金表';
 # 基金每日净值表
 drop table if exists `fund_value`;
 create table `fund_value`(
     `id` bigint unsigned not null auto_increment primary key,
     `fund_id` int unsigned not null default 0 comment '基金ID',
-    `date` date default null comment '日期',
+    `date` date default current_date() comment '日期',
     `net_worth` decimal(10,4) not null default 0 comment '净值',
     unique idx_fund_id_date(fund_id, `date`)
 )engine=innodb charset=utf8 comment '基金净值表';
