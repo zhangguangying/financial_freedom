@@ -49,6 +49,7 @@ class FundFlowController extends AdminController
         $form->decimal('amount', __('份数'));
         $form->decimal('net_worth', __('净值'));
         $form->decimal('service_charge', __('手续费'));
+        $form->date('create_time', __('创建时间'));
         $form->saved(function (Form $form) {
             if ($form->type == 1) {
                 // 原来的份额及净值

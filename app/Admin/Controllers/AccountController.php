@@ -15,7 +15,8 @@ class AccountController extends AdminController
     protected $types = [
         1 => '应急资金',
         2 => '生活日用',
-        3 => '投资账户'
+        3 => '投资账户',
+        4 => '待投入账户',
     ];
 
     protected function table()
