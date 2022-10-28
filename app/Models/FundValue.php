@@ -11,4 +11,9 @@ class FundValue extends Model
     public $timestamps = false;
 
     protected $guarded = [];
+
+    public function fund()
+    {
+        return $this->belongsTo(Fund::class, 'fund_id', 'id');
+    }
 }

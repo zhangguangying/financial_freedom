@@ -14,4 +14,5 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('home');
     $router->resource('funds', FundController::class);
     $router->resource('fund-owners', FundOwnerController::class);
+    $router->resource('fund-values', FundValueController::class);
 });
