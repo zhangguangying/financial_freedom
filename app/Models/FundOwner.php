@@ -10,6 +10,8 @@ class FundOwner extends Model
 
     public $timestamps = false;
 
+    protected $guarded = [];
+
     public function fund()
     {
         return $this->hasOne(Fund::class, 'id', 'fund_id');

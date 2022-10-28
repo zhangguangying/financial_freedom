@@ -42,35 +42,40 @@ class FundFlowController extends AdminController
     {
         $form = new Form(new FundFlow());
 
-        $form->number('fund_id', __('Fund id'))
+        $form->select('fund_id', __('基金'))
             ->options(Fund::query()->pluck('name', 'id')->toArray());
         $form->select('type', __('Type'))->options($this->types);
-        $form->decimal('price', __('价格'))->default(0.0000);
-        $form->number('amount', __('份数'));
-        $form->decimal('net_worth', __('净值'))->default(0.0000);
-        $form->decimal('service_charge', __('手续费'))->default(0.0000);
+        $form->decimal('price', __('价格'));
+        $form->decimal('amount', __('份数'));
+        $form->decimal('net_worth', __('净值'));
+        $form->decimal('service_charge', __('手续费'));
         $form->saved(function (Form $form) {
-            // 原来的份额及净值
-            $fund       = FundOwner::query()->where('fund_id', $form->fund_id)->find(['own_amount', 'net_worth']);
-            $own_amount = $fund->own_amount ?? 0;
-            $net_worth  = $fund->net_worth ?? 0;
-            if (!empty($fund)) {
-                // 原来的份额*净值是原来的价格 = 原来的总价格
-                $sum = bcmul((string)$own_amount, (string)$net_worth, 4);
+            if ($form->type == 1) {
+                // 原来的份额及净值
+                $fund         = FundOwner::query()->where('fund_id', $form->fund_id)->first(['own_amount', 'net_worth']);
+                $own_amount   = 0;
+                $origin_price = 0;
+                if (!empty($fund)) {
+                    // 原来的份额*净值是原来的价格 = 原来的总价格
+                    $origin_price = bcmul((string)$fund->own_amount, (string)$fund->net_worth, 4);
+                    $own_amount   = $fund->own_amount;
+                }
+                // 当前的份额 + 以前的份额
+                $own_amount = bcadd((string)$form->amount, (string)$own_amount, 4);
+                // 原来的总价格 + 当前的价格 / 总份额
+                $net_worth  = bcdiv(bcadd($origin_price, (string)$form->price, 4), $own_amount, 4);
+                FundOwner::query()
+                    ->updateOrCreate([
+                        'fund_id' => $form->fund_id,
+                    ], [
+                        'own_amount' => $own_amount,
+                        'net_worth'  => $net_worth,
+                    ]);
             } else {
-                $sum = 0;
+                FundOwner::query()
+                    ->where('fund_id', $form->fund_id)
+                    ->decrement('own_amount', $form->amount);
             }
-            // 当前的份额 + 以前的份额
-            $own_amount = bcadd((string)$form->amount, (string)$own_amount, 4);
-            // 原来的总价格 + 当前的价格 / 总份额
-            $net_worth  = bcdiv(bcadd($sum, (string)$form->price, 4), $own_amount, 4);
-            FundOwner::query()
-                ->updateOrCreate([
-                    'fund_id' => $form->fund_id,
-                ], [
-                    'own_amount' => $own_amount,
-                    'net_worth'  => $net_worth,
-                ]);
         });
 
         return $form;

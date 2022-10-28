@@ -32,7 +32,8 @@ create table `fund_flow`(
     `amount` decimal(10, 2) unsigned not null default 0 comment '份额',
     `price` decimal(10, 2) unsigned not null default 0 comment '价格',
     `net_worth` decimal(10, 4) not null default 0 comment '成交净值',
-    `service_charge` decimal(10, 4) not null default 0 comment '手续费'
+    `service_charge` decimal(10, 4) not null default 0 comment '手续费',
+    `create_time` datetime not null default current_timestamp() comment '创建时间'
 )engine=innodb charset=utf8 comment '基金流水表';
 # 账户表
 drop table if exists `account`;
