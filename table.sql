@@ -29,7 +29,8 @@ create table `fund_flow`(
     `id` int unsigned not null auto_increment primary key,
     `fund_id` int unsigned not null default 0 comment '基金ID',
     `type` tinyint(1) not null default 0 comment '类型：1买入，2卖出',
-    `amount` int unsigned not null default 0 comment '卖出份额',
+    `amount` decimal(10, 2) unsigned not null default 0 comment '份额',
+    `price` decimal(10, 2) unsigned not null default 0 comment '价格',
     `net_worth` decimal(10, 4) not null default 0 comment '成交净值',
     `service_charge` decimal(10, 4) not null default 0 comment '手续费'
 )engine=innodb charset=utf8 comment '基金流水表';

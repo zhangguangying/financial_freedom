@@ -10,5 +10,8 @@ class FundFlow extends Model
 
     public $timestamps = false;
 
-
+    public function fund()
+    {
+        return $this->hasOne(Fund::class, 'id', 'fund_id');
+    }
 }
