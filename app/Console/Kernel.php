@@ -27,6 +27,8 @@ class Kernel extends ConsoleKernel
     {
          $schedule->command('crawl:fund_value')
                   ->cron('0 05 * * *');
+        $schedule->command('crawl:qieman')
+            ->cron('0 05 * * *');
     }
 
     /**

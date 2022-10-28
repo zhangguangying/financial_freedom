@@ -16,4 +16,5 @@ Route::group([
     $router->resource('fund-owners', FundOwnerController::class);
     $router->resource('fund-values', FundValueController::class);
     $router->resource('fund-flows', FundFlowController::class);
+    $router->resource('accounts', AccountController::class);
 });
