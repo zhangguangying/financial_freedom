@@ -5,9 +5,11 @@ namespace App\Admin\Controllers;
 use App\Models\Fund;
 use App\Models\FundFlow;
 use App\Models\FundOwner;
+use App\Models\FundValue;
 use Encore\Admin\Form;
 use Encore\Admin\Http\Controllers\AdminController;
 use Encore\Admin\Table;
+use Illuminate\Support\Collection;
 
 class FundFlowController extends AdminController
 {
@@ -22,12 +24,20 @@ class FundFlowController extends AdminController
     {
         $table = new Table(new FundFlow());
 
+        $fundLatelyValues = FundValue::getFundLatelyValue();
+        $table->model()->collection(function (Collection $collection) use ($fundLatelyValues) {
+             foreach ($collection as $item) {
+                 $item->new_net_worth = $fundLatelyValues[$item->fund_id];
+             }
+             return $collection;
+        });
         $table->column('id', __('Id'));
         $table->column('fund.code', __('基金代码'));
         $table->column('fund.name', __('基金名称'));
         $table->column('type', __('操作类型'))->using($this->types);
         $table->column('amount', __('份数'));
         $table->column('net_worth', __('净值'));
+        $table->column('new_net_worth', __('最新净值'));
         $table->column('service_charge', __('手续费'));
 
         return $table;
