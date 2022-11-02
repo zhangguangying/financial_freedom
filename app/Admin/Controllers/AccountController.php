@@ -37,7 +37,7 @@ class AccountController extends AdminController
             $fundSum     = bcadd($fundSum, bcmul((string)$nowNetWorth, (string)$fund['own_amount'], 4), 4);
         }
         Account::query()
-            ->where('name', '基金账户')
+            ->where('type', 5)
             ->update(['value' => $fundSum]);
 
         $table->column('id', __('Id'));
