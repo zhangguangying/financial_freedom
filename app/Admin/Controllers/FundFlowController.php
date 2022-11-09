@@ -20,18 +20,27 @@ class FundFlowController extends AdminController
         2 => '卖出',
     ];
 
-    protected function table()
+    protected function table(): Table
     {
         $table = new Table(new FundFlow());
+        $table->filter(function ($filter) {
+            $filter->disableIdFilter();
 
+            $filter->equal('fund.code', __('代码'));
+            $filter->like('fund.name', __('基金名称'));
+        });
+
+        // 最新净值
         $fundLatelyValues = FundValue::getFundLatelyValue();
         $table->model()->collection(function (Collection $collection) use ($fundLatelyValues) {
              foreach ($collection as $item) {
                  $item->new_net_worth = $fundLatelyValues[$item->fund_id];
+                 $item->profit_rate   = bcdiv(bcsub(strval($item->new_net_worth), strval($item->net_worth), 4), strval($item->net_worth), 4) * 100 . '%';
+                 $item->profit        = bcmul(bcsub(strval($item->new_net_worth), strval($item->net_worth), 4), strval($item->amount), 2);
              }
              return $collection;
         });
-        $table->column('id', __('Id'));
+
         $table->column('fund.code', __('基金代码'));
         $table->column('fund.name', __('基金名称'));
         $table->column('type', __('操作类型'))->using($this->types);
@@ -39,27 +48,40 @@ class FundFlowController extends AdminController
         $table->column('net_worth', __('净值'));
         $table->column('new_net_worth', __('最新净值'));
         $table->column('service_charge', __('手续费'));
+        $table->column('profit_rate', __('盈利比例'))->display(function ($value) {
+            if ($value > 0) {
+                return "<span style='color: red'>{$value}</span>";
+            }
+            return "<span style='color: green'>{$value}</span>";
+        });
+        $table->column('profit', __('盈利金额'))->display(function ($value) {
+            if ($value > 0) {
+                return "<span style='color: red'>{$value}</span>";
+            }
+            return "<span style='color: green'>{$value}</span>";
+        });
+        $table->column('create_time', __('创建时间'));
 
         return $table;
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
     protected function form()
     {
         $form = new Form(new FundFlow());
 
         $form->select('fund_id', __('基金'))
             ->options(Fund::query()->pluck('name', 'id')->toArray());
-        $form->select('type', __('Type'))->options($this->types);
-        $form->decimal('price', __('价格'));
+        $form->select('type', __('Type'))
+            ->options($this->types)
+            ->default(1);
+        $form->decimal('price', __('价格'))
+            ->default(2500);
         $form->decimal('amount', __('份数'));
         $form->decimal('net_worth', __('净值'));
         $form->decimal('service_charge', __('手续费'));
-        $form->date('create_time', __('创建时间'));
+        $form->date('create_time', __('创建时间'))->default(date('Y-m-d'));
+
+        // 买入卖出时更新拥有的基金成本
         $form->saved(function (Form $form) {
             if ($form->type == 1) {
                 // 原来的份额及净值
